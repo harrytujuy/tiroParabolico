@@ -19,11 +19,11 @@ public class Game extends JFrame{
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        GamePanel panel = new GamePanel();
+        GamePanel panel = new GamePanel();                      //Se crea el objeto GamePanel
         
-        panel.setTitle("Tiro Parabolico");
-        panel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        panel.setVisible(true);
+        panel.setTitle("Tiro Parabolico");                      //Se crea titulo para ventana
+        panel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);   //Se cierra si se hace click en tacha
+        panel.setVisible(true);                                 //Permite que la ventana sea visible
     }
     
 }

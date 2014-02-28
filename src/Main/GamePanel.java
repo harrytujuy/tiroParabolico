@@ -36,46 +36,43 @@ import javax.swing.JOptionPane;
 public class GamePanel extends JFrame implements Runnable, KeyListener, MouseListener{
     
     //Objetos
-    private final Cubeta cubeta;
-    private final Bola bola;
-    private final Pared pared;
-    private final SoundClip cheer;
-    private final SoundClip boo;
-    private Vector vec;
+    private final Cubeta cubeta;    //Se declara objeto cubeta
+    private final Bola bola;        //Se declara objeto bola
+    private final Pared pared;      //Se declara objeto pared
+    private final SoundClip cheer;  //Se declara sonido de atrapada
+    private final SoundClip boo;    //Se declara sonido de perdida
+    private Vector vec;             //Se declara objeto vector
+    private Graphics dbg;           //Se declara el objeto dbg
+    private Image dbImage;          //Se declara el objeto dbImage
     
     //Variables bola
-    private int x_init;
-    private int y_init;
-    private int x_tiro;
-    private int y_tiro;
-    private int vxi;
-    private int hmax;
-    private int dif;
+    private int x_init;             //Se declara posicion inicial en x de bola
+    private int y_init;             //Se declara posicion inicial en y de bola
+    private int x_tiro;             //Se declara aumento en x de bola
+    private int y_tiro;             //Se declara aumento en y de bola
+    private int vxi;                //Se declara velocidad en x de bola
+    private int hmax;               //Se declara altura maxima de bola
+    private int dif;                //Se declara dificultad de atrapada
     
     //Variables cubeta
-    private int x_pos;
-    private int y_pos;
-    private int dx;
-    private int dy;
-    private boolean tiro;
+    private final int x_pos;        //Se declara posicion inicial en x de cubeta
+    private final int y_pos;        //Se declara posicion inicial en y de cubeta
+    private int dx;                 //Se declara aumento en x de cubeta
     
     //Variables generales
-    private boolean pausa;
-    private boolean running;
-    private boolean sonidos;
-    private int score;
-    private int combo;
-    private int vidas;
-    private Graphics dbg;
-    private Image imagenFondo;
-    private Image dbImage;
-    private final int fps;
-    private long targetTime;
-    private final int height;
-    private final int width;
-    private String nombreArchivo;
-    private String[] arr;
-    
+    private boolean pausa;          //Se declara la variable pausa
+    private boolean running;        //Se declara la variable running
+    private boolean sonidos;        //Se declara la variable sonidos
+    private boolean tiro;           //Se declara la variable tiro
+    private int score;              //Se declara la variable score
+    private int combo;              //Se declara la variable combo
+    private int vidas;              //Se declara la variable vidas
+    private final int fps;          //Se declara la variable fps (frames per second)
+    private long targetTime;        //Se declara la variable targetTime
+    private final int height;       //Se declara la variable height
+    private final int width;        //Se declara la variable width
+    private String nombreArchivo;   //Se declara la variable nombreArchivo
+    private String[] arr;           //Se declara el arreglo arr   
     
     public GamePanel(){
         
@@ -92,17 +89,16 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
         nombreArchivo = "Puntaje.txt";
         vec = new Vector();
         
-        imagenFondo = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/cuarto.png")); //Inicializacion de la imagen de fondo
-        
         //Se da el tamaño y color de la ventana, se agregan los listeners de teclado y mouse
         setSize(width,height);
+        setBackground(Color.WHITE);
         addKeyListener(this);
         addMouseListener(this);
         
         //Se inicializa el objeto cubeta
         x_pos = 550;
         y_pos = 400;
-        dx = dy = 0;
+        dx = 0;
         cubeta = new Cubeta(x_pos, y_pos, Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/cubeta.png")));
         
         //Se inicializa el objeto bola
@@ -226,16 +222,15 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     
     public void paint1(Graphics g){
         //Pintamos cubeta, bola y pared
-        g.drawImage(imagenFondo, 0, 0, getSize().width, getSize().height, this);
         if(cubeta != null && bola != null && pared != null){
             g.drawImage(cubeta.getImagenI(), cubeta.getPosX(), cubeta.getPosY(), this);
             g.drawImage(bola.getImagenI(), bola.getPosX(), bola.getPosY(), this);
             g.drawImage(pared.getImagenI(), pared.getPosX(), pared.getPosY(), this);
             g.setColor(Color.BLACK);
             g.setFont(new Font("Times New Roman",Font.PLAIN,18));
-            g.drawString("Score: "+score, 520, 60);
-            g.drawString("Combo: "+combo, 520, 80);
-            g.drawString("Sonidos: "+ (sonidos ? "Si":"No"), 520, 100);
+            g.drawString("Score: "+score, 540, 60);
+            g.drawString("Combo: "+combo, 540, 80);
+            g.drawString("Sonidos: "+ (sonidos ? "Si":"No"), 540, 100);
             g.drawString("Vidas: " +vidas,40,60);
             if(pausa)
                 g.drawString("Juego Pausado", 480, 20);
