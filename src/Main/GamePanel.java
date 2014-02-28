@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package Main;
 
 import Objetos.*;
@@ -29,10 +23,6 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 
 
-/**
- *
- * @author Szerch
- */
 public class GamePanel extends JFrame implements Runnable, KeyListener, MouseListener{
     
     //Objetos
@@ -58,46 +48,56 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     private final int x_pos;        //Se declara posicion inicial en x de cubeta
     private final int y_pos;        //Se declara posicion inicial en y de cubeta
     private int dx;                 //Se declara aumento en x de cubeta
+    private int direccion;          //Se declara la direccion que tendra la cubeta
+    private boolean choqueDer;      //Se declara el boleano que controle las colisiones derechas de la cubeta
+    private boolean choqueIzq;      //Se declara el boleano que controle las colisiones izquierdas de la cubeta
     
     //Variables generales
     private boolean pausa;          //Se declara la variable pausa
     private boolean running;        //Se declara la variable running
     private boolean sonidos;        //Se declara la variable sonidos
     private boolean tiro;           //Se declara la variable tiro
+    private boolean instrucciones;  //Variable de verifciacion para mostrar las instrucciones
     private int score;              //Se declara la variable score
     private int combo;              //Se declara la variable combo
     private int vidas;              //Se declara la variable vidas
+    private int fail;               //Se decalara la variable de conteo de veces que no se atrapa la pelota
     private final int fps;          //Se declara la variable fps (frames per second)
     private long targetTime;        //Se declara la variable targetTime
     private final int height;       //Se declara la variable height
     private final int width;        //Se declara la variable width
     private String nombreArchivo;   //Se declara la variable nombreArchivo
-    private String[] arr;           //Se declara el arreglo arr   
+    private String[] arr;           //Se declara el arreglo arr
+    private Image imagenFondo;      //Se declara la variable que contendra la imagen de fondo
+    private Image imagenIns;        //Se declara la variable que contendra la imagen de las instrucciones
     
     public GamePanel(){
         
         //Se inicializan variables generales
         fps = 60;
         targetTime = 1000/fps;
-        score = 0;
-        combo = 0;
-        vidas = 5;
-        width = 640;
-        height = 480;
-        pausa = false;
-        sonidos = true;
-        nombreArchivo = "Puntaje.txt";
+        score = 0;                          //Se inicializa el score en 0
+        combo = 0;                          //Se inicializa el combo en 0
+        vidas = 5;                          //Se definen las 5 vidas que tendra el usuario
+        fail = 0;                           //Se inicializa en 0 la variable que cuenta las veces que no atrapa la pelota
+        width = 640;                        //Se define el ancho del jFrame en 640
+        height = 480;                       //Se define el alto del jFrame en 480
+        pausa = false;                      //Se define falsa la pausa (para no iniciar pausado)
+        sonidos = true;                     //Se define verdadero a los sonidos (para que se escuchen)
+        nombreArchivo = "Puntaje.txt";      //Se crea el archivo de puntaje
         vec = new Vector();
+        imagenFondo = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/cuarto.png"));       //Se carga la imagen de fondo
+        imagenIns = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/instrucciones.png"));  //Se carga la imagen de instrucciones
         
-        //Se da el tamaño y color de la ventana, se agregan los listeners de teclado y mouse
+        //Se da el tamaño de la ventana, se agregan los listeners de teclado y mouse
         setSize(width,height);
-        setBackground(Color.WHITE);
         addKeyListener(this);
         addMouseListener(this);
         
         //Se inicializa el objeto cubeta
         x_pos = 550;
         y_pos = 400;
+        direccion = 0;
         dx = 0;
         cubeta = new Cubeta(x_pos, y_pos, Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/cubeta.png")));
         
@@ -131,8 +131,8 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             wait = targetTime - elapsed/1000000;
             if(wait < 0)
                 wait = 5;
-            //Si no esta pausado el juego se actualiza y checa colisiones
-            if(!pausa){
+            //Si no esta pausado el juego ni mostrando las instrucciones se actualiza y checa colisiones
+            if(!pausa || !instrucciones){
                 actualiza();
                 checaColision();
             }
@@ -160,7 +160,19 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     public void actualiza(){
         
         //Movimiento de cubeta
-        cubeta.setPosX(cubeta.getPosX()+dx);
+        switch(direccion){
+            case 0:{                                    //Si la direccion es cero la cubeta se queda estática
+                cubeta.setPosX(cubeta.getPosX());
+                break;
+            }
+            case 1:{                                    //Si la direccion es uno la cubeta se mueve a la izquierda 
+                cubeta.setPosX(cubeta.getPosX() - dx);
+                break;
+            }
+            case 2:{                                    //Si la direccion es 2 la cubeta se mueve a la derecha
+                cubeta.setPosX(cubeta.getPosX() + dx);
+            }
+        }
         
         //Movimiento de bola
         if(tiro){
@@ -173,16 +185,20 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     public void checaColision(){
         
         //Verifica si la cubeta choca contra las paredes
-        if(cubeta.intersecta(pared)){
-            dx = 3;
+        if(cubeta.intersecta(pared)){                       //Verifica si la cubeta choca contra la pared
+            direccion = 0;                                  //Evita que la cubeta se siga moviendo
+            choqueIzq = true;                               //Evita que la cubeta se siga moviendo a la izquierda
         }
-        if(cubeta.getPosX() + cubeta.getAncho() >= width)
-            dx = -3;
+        if(cubeta.getPosX() + cubeta.getAncho() >= width){  //Verifica si la cubeta choca contra el mueble
+            direccion = 0;                                  //Evita que la cubeta se siga moviendo
+            choqueDer = true;                               //Evita que la cubeta se siga moviendo a la derecha
+        }
+        
         //Verifica si la cubeta toca la bola
         if(cubeta.intersecta(bola)){
             bola.setPosX(x_init);
             bola.setPosY(y_init);
-            score++;
+            score += 2;
             combo++;
             tiro = false;
             if(sonidos)
@@ -192,12 +208,16 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
         if(bola.getPosY() + bola.getAlto() >= height){
             bola.setPosX(x_init);
             bola.setPosY(y_init);
-            vidas--;
+            fail++;                                 //Se aumenta la cantidad de veces que ha fallado
+            if(fail >= 3){                          //Se comprueba que haya fallado 3 veces
+                vidas--;                            //Se disminuye una vida
+                fail = 0;                           //El contador de fallas se reinicia
+            }
             combo = 0;
-            dif++; //Aumenta la dificultad
+            dif++;                                  //Aumenta la dificultad
             tiro = false;
             if(sonidos)
-                boo.play(); //Se reproduce el sonido de derrota
+                boo.play();                         //Se reproduce el sonido de derrota
         }           
     }
     
@@ -221,6 +241,8 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     }
     
     public void paint1(Graphics g){
+        //Se pinta el cuarto en el fondo
+        g.drawImage(imagenFondo, 0, 0, getSize().width, getSize().height, this);
         //Pintamos cubeta, bola y pared
         if(cubeta != null && bola != null && pared != null){
             g.drawImage(cubeta.getImagenI(), cubeta.getPosX(), cubeta.getPosY(), this);
@@ -228,12 +250,18 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             g.drawImage(pared.getImagenI(), pared.getPosX(), pared.getPosY(), this);
             g.setColor(Color.BLACK);
             g.setFont(new Font("Times New Roman",Font.PLAIN,18));
-            g.drawString("Score: "+score, 540, 60);
-            g.drawString("Combo: "+combo, 540, 80);
-            g.drawString("Sonidos: "+ (sonidos ? "Si":"No"), 540, 100);
+            g.drawString("Score: "+score, 520, 60);
+            g.drawString("Combo: "+combo, 520, 80);
+            g.drawString("Sonidos: "+ (sonidos ? "Si":"No"), 520, 100);
             g.drawString("Vidas: " +vidas,40,60);
-            if(pausa)
-                g.drawString("Juego Pausado", 480, 20);
+            if(pausa){
+                g.setColor(Color.BLACK);
+                g.setFont(new Font("Times New Roman",Font.PLAIN,26));
+                g.drawString("Juego Pausado", 320, 218);
+            }
+            if(instrucciones){
+                g.drawImage(imagenIns, 100, 90, rootPane);
+            }
         }
         else{
             g.drawString("No se cargo la imagen..", 20, 20);
@@ -299,23 +327,39 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     @Override
     public void keyPressed(KeyEvent e) {
         //Casos para cada vez que se oprime cierta tecla
-        if(e.getKeyCode() == KeyEvent.VK_LEFT)
-            dx=-3;
-        else if(e.getKeyCode() == KeyEvent.VK_RIGHT)
-            dx=3;
+        if(e.getKeyCode() == KeyEvent.VK_LEFT){
+            if(!choqueIzq){
+                direccion = 1;
+                dx=3;
+                choqueDer = false;
+            }
+        }
+        else if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+            if(!choqueDer){
+                direccion = 2;
+                dx=3;
+                choqueIzq = false;
+            }
+        }
         else if(e.getKeyCode() == KeyEvent.VK_P)
             pausa = !pausa;
         else if(e.getKeyCode() == KeyEvent.VK_S)
             sonidos = !sonidos;
+        else if(e.getKeyCode() == KeyEvent.VK_I)
+            instrucciones = !instrucciones;
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         //Casos para cada vez que se suelta cierta tecla
-        if(e.getKeyCode() == KeyEvent.VK_LEFT)
+        if(e.getKeyCode() == KeyEvent.VK_LEFT){
+            direccion = 0;
             dx=0;
-        else if(e.getKeyCode() == KeyEvent.VK_RIGHT)
+        }
+        else if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+            direccion = 0;
             dx=0;
+        }
     }
 
     @Override
@@ -324,6 +368,7 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
         vxi = (int) (Math.random()*(3-1+1)+1); //Velocidad en x es aleatoria
         hmax = (int) (Math.random()*(80-50+1)+50); //Altura maxima es aleatoria
         tiro = true; //Inicia el proceso de tiro parabolico
+        //*(80-50+1)+50
     }
 
     @Override
