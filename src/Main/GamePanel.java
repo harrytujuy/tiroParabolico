@@ -1,3 +1,8 @@
+/*
+    Sergio Alejandro López Ruiz A00813432
+    Fernando Gamboa López A00813314
+*/
+
 package Main;
 
 import Objetos.*;
@@ -16,11 +21,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
-import static java.lang.Math.pow;
 import java.util.Vector;
-import javax.swing.JOptionPane;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class GamePanel extends JFrame implements Runnable, KeyListener, MouseListener{
@@ -31,7 +35,6 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     private final Pared pared;      //Se declara objeto pared
     private final SoundClip cheer;  //Se declara sonido de atrapada
     private final SoundClip boo;    //Se declara sonido de perdida
-    private Vector vec;             //Se declara objeto vector
     private Graphics dbg;           //Se declara el objeto dbg
     private Image dbImage;          //Se declara el objeto dbImage
     
@@ -51,6 +54,11 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     private int direccion;          //Se declara la direccion que tendra la cubeta
     private boolean choqueDer;      //Se declara el boleano que controle las colisiones derechas de la cubeta
     private boolean choqueIzq;      //Se declara el boleano que controle las colisiones izquierdas de la cubeta
+    
+    //Variables de archivo
+    private FileWriter archivo;     //Se declara el archivo de escritura
+    private PrintWriter pw;         //Se declara la escritura
+    private String datos[] = new String[10];    //Se declara el arreglo que contendra los datos
     
     //Variables generales
     private boolean pausa;          //Se declara la variable pausa
@@ -90,7 +98,6 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
         sonidos = true;                         //Se define verdadero a los sonidos (para que se escuchen)
         creditos = false;                       //Se define falsa la variable de creditos (para que no muestre los creditos)
         nombreArchivo = "JuegosGuardados.txt";  //Se crea el archivo de puntaje
-        vec = new Vector();
         imagenFondo = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/cuarto.png"));       //Se carga la imagen de fondo
         imagenIns = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/instrucciones.png"));  //Se carga la imagen de instrucciones
         imagenCred = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/creditos.png"));
@@ -150,18 +157,9 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             }
             if(vidas == 0){
                 creditos = true;
-                //running = false;
             }
         }
-        /*String nombre = JOptionPane.showInputDialog("Cual es tu nombre?");
-        JOptionPane.showMessageDialog(null, "El puntaje de " + nombre + " es: " + score, "PUNTAJE", JOptionPane.PLAIN_MESSAGE);
-        try{
-            leeArchivo();
-            vec.add(new Puntaje(nombre,score));
-            grabaArchivo();
-        }catch(Exception e){
-            e.printStackTrace();
-        }*/
+        
         System.exit(0);
     }
     
@@ -296,39 +294,77 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
 	// Dibuja la imagen actualizada
 	g.drawImage (dbImage, 0, 0, this);
     }
-    
-    public void leeArchivo() throws IOException{
-        BufferedReader fileIn;
-        try{
-            fileIn = new BufferedReader(new FileReader(nombreArchivo));
-        }catch(FileNotFoundException e){
-            File puntos = new File(nombreArchivo);
-            PrintWriter fileOut = new PrintWriter(puntos);
-            fileOut.println("100,demo");
-            fileOut.close();
-            fileIn = new BufferedReader(new FileReader(nombreArchivo));
-        }
-        String dato = fileIn.readLine();
-        while(dato != null){
-            arr = dato.split(",");
-            int num = (Integer.parseInt(arr[0]));
-            String nom = arr[1];
-            vec.add(new Puntaje(nom,num));
-            dato = fileIn.readLine();
-        }
-        fileIn.close();
-    }
-    
-    public void grabaArchivo() throws IOException{
-        PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));
-        for(int i=0; i<vec.size(); i++){
-            Puntaje x;
-            x = (Puntaje) vec.get(i);
-            fileOut.println(x.toString());
-        }
-        fileOut.close();
+     
+    public void guardar() throws Exception{
+        try {
+            // asigno nombre de fichero, mantengo la nomenclatura
+            archivo = new FileWriter("juegosGuardados.txt");
+            // asigno PrintWriter a fichero
+            pw = new PrintWriter(archivo);
+ 
+            // escribo los parametros
+            pw.println(score);
+            pw.println(combo);
+            pw.println(vidas);
+            pw.println(fail);
+            pw.println(pausa);
+            pw.println(sonidos);
+            pw.println(bola.getPosX());
+            pw.println(bola.getPosY());
+            pw.println(cubeta.getPosX());
+            pw.println(cubeta.getPosY());
+ 
+            // vuelco la memoria al disco duro
+            pw.flush();
+	} catch (Exception e) {
+		throw new Exception(e);
+	} finally {
+		// cierro los canales de escritura
+		archivo.close();
+		pw.close();
+	}// end try
     }
 
+    public String[] cargar() throws Exception{
+        // Arreglo a retornar
+	String parametros[] = new String[10];
+	// instancio objetos de lectura
+	File archivo = null;
+	FileReader fr = null;
+	BufferedReader br = null;
+	try {
+                // Apertura del fichero y creacion de BufferedReader para poder
+                // hacer una lectura comoda (disponer del metodo readLine()).
+		archivo = new File("juegosGuardados.txt");
+		fr = new FileReader(archivo);
+		br = new BufferedReader(fr);
+ 
+		// Lectura del fichero
+		String linea;
+		// indice para el array
+		int i = 0;
+		while ((linea = br.readLine()) != null) {
+			parametros[i] = linea;
+			i++;
+		}// end while
+	} catch (FileNotFoundException e) {
+		throw new Exception("No existe el fichero [juegosGuardados.txt] \n"+ e);
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			// En el finally cerramos el fichero, para asegurarnos
+			// que se cierra tanto si todo va bien como si salta
+			// una excepcion.
+			try {
+				if (null != fr)
+					fr.close();
+			} catch (Exception e2) {
+				throw new Exception(e2);
+			}// end try
+		}// end try
+		return parametros;
+    }
+    
     @Override
     public void keyTyped(KeyEvent e) {
         
@@ -357,6 +393,30 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             sonidos = !sonidos;
         else if(e.getKeyCode() == KeyEvent.VK_I)
             instrucciones = !instrucciones;
+        else if(e.getKeyCode() == KeyEvent.VK_G){
+            try {
+                guardar();
+            } catch (Exception ex) {
+                Logger.getLogger(GamePanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if(e.getKeyCode() == KeyEvent.VK_C){
+            try {
+                datos = cargar();
+            } catch (Exception ex) {
+                Logger.getLogger(GamePanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            score = Integer.parseInt(datos[0]);
+            combo = Integer.parseInt(datos[1]);
+            vidas = Integer.parseInt(datos[2]);
+            fail = Integer.parseInt(datos[3]);
+            pausa = Boolean.parseBoolean(datos[4]);
+            sonidos = Boolean.parseBoolean(datos[5]);
+            bola.setPosX(Integer.parseInt(datos[6]));
+            bola.setPosY(Integer.parseInt(datos[7]));
+            cubeta.setPosX(Integer.parseInt(datos[8]));
+            cubeta.setPosY(Integer.parseInt(datos[9]));
+        }
     }
 
     @Override
@@ -378,7 +438,6 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
         vxi = (int) (Math.random()*(3-1+1)+1); //Velocidad en x es aleatoria
         hmax = (int) (Math.random()*(80-50+1)+50); //Altura maxima es aleatoria
         tiro = true; //Inicia el proceso de tiro parabolico
-        //*(80-50+1)+50
     }
 
     @Override
@@ -400,4 +459,5 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     public void mouseExited(MouseEvent e) {
         
     }
+    
 }

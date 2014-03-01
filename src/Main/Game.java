@@ -1,3 +1,8 @@
+/*
+    Sergio Alejandro López Ruiz A00813432
+    Fernando Gamboa López A00813314
+*/
+
 package Main;
 
 import javax.swing.JFrame;
