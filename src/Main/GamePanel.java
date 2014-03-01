@@ -313,6 +313,7 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             pw.println(bola.getPosY());
             pw.println(cubeta.getPosX());
             pw.println(cubeta.getPosY());
+            pw.println(tiro);
  
             // vuelco la memoria al disco duro
             pw.flush();
@@ -327,7 +328,7 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
 
     public String[] cargar() throws Exception{
         // Arreglo a retornar
-	String parametros[] = new String[10];
+	String parametros[] = new String[11];
 	// instancio objetos de lectura
 	File archivo = null;
 	FileReader fr = null;
@@ -416,6 +417,7 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             bola.setPosY(Integer.parseInt(datos[7]));
             cubeta.setPosX(Integer.parseInt(datos[8]));
             cubeta.setPosY(Integer.parseInt(datos[9]));
+            tiro = Boolean.parseBoolean(datos[10]);
         }
     }
 
