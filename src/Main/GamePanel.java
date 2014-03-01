@@ -58,6 +58,9 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     private boolean sonidos;        //Se declara la variable sonidos
     private boolean tiro;           //Se declara la variable tiro
     private boolean instrucciones;  //Variable de verifciacion para mostrar las instrucciones
+    private boolean creditos;       //Variable de verificacion para mostrar los creditos
+    private boolean guardar;        //Variable de verificacion para guardar un juego
+    private boolean cargar;         //Variable de verificacion para cargar unjuego
     private int score;              //Se declara la variable score
     private int combo;              //Se declara la variable combo
     private int vidas;              //Se declara la variable vidas
@@ -70,24 +73,27 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
     private String[] arr;           //Se declara el arreglo arr
     private Image imagenFondo;      //Se declara la variable que contendra la imagen de fondo
     private Image imagenIns;        //Se declara la variable que contendra la imagen de las instrucciones
+    private Image imagenCred;       //Se declara la variable que contendra la imagen de los creditos
     
     public GamePanel(){
         
         //Se inicializan variables generales
         fps = 60;
         targetTime = 1000/fps;
-        score = 0;                          //Se inicializa el score en 0
-        combo = 0;                          //Se inicializa el combo en 0
-        vidas = 5;                          //Se definen las 5 vidas que tendra el usuario
-        fail = 0;                           //Se inicializa en 0 la variable que cuenta las veces que no atrapa la pelota
-        width = 640;                        //Se define el ancho del jFrame en 640
-        height = 480;                       //Se define el alto del jFrame en 480
-        pausa = false;                      //Se define falsa la pausa (para no iniciar pausado)
-        sonidos = true;                     //Se define verdadero a los sonidos (para que se escuchen)
-        nombreArchivo = "Puntaje.txt";      //Se crea el archivo de puntaje
+        score = 0;                              //Se inicializa el score en 0
+        combo = 0;                              //Se inicializa el combo en 0
+        vidas = 1;                              //Se definen las 5 vidas que tendra el usuario
+        fail = 0;                               //Se inicializa en 0 la variable que cuenta las veces que no atrapa la pelota
+        width = 640;                            //Se define el ancho del jFrame en 640
+        height = 480;                           //Se define el alto del jFrame en 480
+        pausa = false;                          //Se define falsa la pausa (para no iniciar pausado)
+        sonidos = true;                         //Se define verdadero a los sonidos (para que se escuchen)
+        creditos = false;                       //Se define falsa la variable de creditos (para que no muestre los creditos)
+        nombreArchivo = "JuegosGuardados.txt";  //Se crea el archivo de puntaje
         vec = new Vector();
         imagenFondo = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/cuarto.png"));       //Se carga la imagen de fondo
         imagenIns = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/instrucciones.png"));  //Se carga la imagen de instrucciones
+        imagenCred = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/creditos.png"));
         
         //Se da el tamaño de la ventana, se agregan los listeners de teclado y mouse
         setSize(width,height);
@@ -142,10 +148,12 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             }catch(Exception e){
                 e.printStackTrace();
             }
-            if(vidas == 0)
-                running = false;
+            if(vidas == 0){
+                creditos = true;
+                //running = false;
+            }
         }
-        String nombre = JOptionPane.showInputDialog("Cual es tu nombre?");
+        /*String nombre = JOptionPane.showInputDialog("Cual es tu nombre?");
         JOptionPane.showMessageDialog(null, "El puntaje de " + nombre + " es: " + score, "PUNTAJE", JOptionPane.PLAIN_MESSAGE);
         try{
             leeArchivo();
@@ -153,7 +161,7 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             grabaArchivo();
         }catch(Exception e){
             e.printStackTrace();
-        }
+        }*/
         System.exit(0);
     }
     
@@ -262,6 +270,8 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             if(instrucciones){
                 g.drawImage(imagenIns, 100, 90, rootPane);
             }
+            if(creditos)
+                g.drawImage(imagenCred, 0, 0, rootPane);
         }
         else{
             g.drawString("No se cargo la imagen..", 20, 20);
