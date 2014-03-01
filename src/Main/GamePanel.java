@@ -82,7 +82,7 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
         targetTime = 1000/fps;
         score = 0;                              //Se inicializa el score en 0
         combo = 0;                              //Se inicializa el combo en 0
-        vidas = 1;                              //Se definen las 5 vidas que tendra el usuario
+        vidas = 5;                              //Se definen las 5 vidas que tendra el usuario
         fail = 0;                               //Se inicializa en 0 la variable que cuenta las veces que no atrapa la pelota
         width = 640;                            //Se define el ancho del jFrame en 640
         height = 480;                           //Se define el alto del jFrame en 480
@@ -210,7 +210,7 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             combo++;
             tiro = false;
             if(sonidos)
-                cheer.play(); //Se reproduce el sonido de victoria
+                cheer.play();                               //Se reproduce el sonido de victoria
         }
         //Verifica si la bola cae al suelo
         if(bola.getPosY() + bola.getAlto() >= height){
@@ -220,9 +220,9 @@ public class GamePanel extends JFrame implements Runnable, KeyListener, MouseLis
             if(fail >= 3){                          //Se comprueba que haya fallado 3 veces
                 vidas--;                            //Se disminuye una vida
                 fail = 0;                           //El contador de fallas se reinicia
+                dif++;                              //Aumenta la dificultad
             }
             combo = 0;
-            dif++;                                  //Aumenta la dificultad
             tiro = false;
             if(sonidos)
                 boo.play();                         //Se reproduce el sonido de derrota
